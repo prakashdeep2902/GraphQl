@@ -3,35 +3,45 @@ import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
 import bodyParser from "body-parser";
 import cors from "cors";
-
-async function getData() {
-  const url = "https://jsonplaceholder.typicode.com/todos";
-  try {
-    const response = await fetch(url);
-    return await response.json();
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    return []; // Return an empty array in case of error
-  }
-}
+import axios from "axios";
+import user from "./user.js";
+import todo from "./todo.js";
 
 async function startServer() {
   const port = 5050;
   const app = express();
   const server = new ApolloServer({
     typeDefs: `
-      type Todo{
+     type User{
+      id:ID!,
+      name:String!,
+      username:String!,
+      email:String!,
+      phone:String!,
+      website:String!
+     }
+  
+     type Todo {
       id:ID!,
       title:String!
       completed:Boolean
+      user:User
     }
      type Query {
        getTodos:[Todo]
+       getAllUsers:[User]
+       getUserByID(id:ID!):User
       }
     `,
     resolvers: {
+      Todo: {
+        user: (todo) => user.find((e) => e.id == todo.id),
+      },
+
       Query: {
-        getTodos: async () => await getData(),
+        getTodos: () => todo,
+        getAllUsers: () => user,
+        getUserByID: (parent, { id }) => user.find((e) => e.id == id),
       },
     },
   });
