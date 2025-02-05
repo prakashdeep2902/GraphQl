@@ -16,7 +16,7 @@ async function getData() {
 }
 
 async function startServer() {
-  const port = 9090;
+  const port = 5050;
   const app = express();
   const server = new ApolloServer({
     typeDefs: `
